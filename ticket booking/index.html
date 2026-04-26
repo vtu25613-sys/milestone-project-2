@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TechVista 2025 — Ticket Booking</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#111118;--surface2:#16161f;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --accent:#c8f044;--accent2:#7c3aed;--accent3:#f0a044;
+  --text:#f0f0f5;--muted:#888899;--danger:#ff5a5a;--success:#44d48c;--warn:#f0a044;
+  --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.7;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:0.025;pointer-events:none;z-index:0}
+.blob{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:0.18}
+.blob-1{width:520px;height:520px;background:var(--accent2);top:-120px;right:-80px;animation:drift 18s ease-in-out infinite alternate}
+.blob-2{width:380px;height:380px;background:var(--accent);bottom:-60px;left:-80px;animation:drift 14s ease-in-out infinite alternate-reverse}
+.blob-3{width:260px;height:260px;background:var(--accent3);top:40%;left:30%;animation:drift 20s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,20px) scale(1.08)}}
+.wrapper{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 1.5rem 4rem}
+nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:.5px solid var(--border);position:sticky;top:0;background:rgba(10,10,15,0.88);backdrop-filter:blur(20px);z-index:100}
+.nav-logo{font-family:var(--font-head);font-size:18px;font-weight:800;letter-spacing:-.02em}
+.nav-logo span{color:var(--accent)}
+.nav-pill{background:var(--accent);color:#0a0a0f;font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 16px;border-radius:100px;border:none;cursor:pointer;transition:opacity .15s,transform .15s}
+.nav-pill:hover{opacity:.85;transform:scale(.97)}
+
+/* stepper */
+.stepper{display:flex;align-items:center;padding:1.5rem 0 0;margin-bottom:2rem}
+.step{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;font-family:var(--font-head)}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:all .3s}
+.step-label{white-space:nowrap;transition:color .3s}
+.step-line{flex:1;height:.5px;background:var(--border);margin:0 12px;min-width:30px;transition:background .4s}
+.step.active .step-num{background:var(--accent);color:#0a0a0f}
+.step.active .step-label{color:var(--text)}
+.step.done .step-num{background:var(--success);color:#0a0a0f}
+.step.done .step-label{color:var(--success)}
+.step.pending .step-num{background:var(--surface2);border:.5px solid var(--border2);color:var(--muted)}
+.step.pending .step-label{color:var(--muted)}
+.step-line.done{background:var(--success)}
+
+/* hero */
+.hero{padding:3.5rem 0 2.5rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;border-bottom:.5px solid var(--border)}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(200,240,68,.08);border:.5px solid rgba(200,240,68,.25);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:1.5rem}
+.hero-tag::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-family:var(--font-head);font-size:clamp(2.2rem,5vw,3.6rem);font-weight:800;line-height:1.05;letter-spacing:-.03em;margin-bottom:1rem}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero-sub{color:var(--muted);font-size:15px;max-width:480px}
+.price-badge{background:var(--surface2);border:.5px solid var(--border2);border-radius:16px;padding:1.2rem 1.8rem;text-align:center;min-width:160px}
+.price-badge .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.price-badge .price{font-family:var(--font-head);font-size:2.4rem;font-weight:800;color:var(--accent);line-height:1.1;margin:4px 0}
+.price-badge .per{font-size:12px;color:var(--muted)}
+
+.section-title{font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem;padding-top:2.5rem;display:flex;align-items:center;gap:12px}
+.section-title::after{content:'';flex:1;height:.5px;background:var(--border)}
+
+.details-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--border);border:.5px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1.5rem}
+.detail-cell{background:var(--surface);padding:1.2rem 1.5rem;transition:background .2s}
+.detail-cell:hover{background:var(--surface2)}
+.dc-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.dc-value{font-family:var(--font-head);font-size:15px;font-weight:600;color:var(--text);line-height:1.3}
+
+.tracker{background:var(--surface);border:.5px solid var(--border2);border-radius:16px;padding:1.5rem;margin-bottom:2.5rem}
+.tracker-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:.75rem}
+.tracker-label{font-size:13px;color:var(--muted)}
+.tracker-nums{display:flex;gap:1.5rem}
+.tracker-num{text-align:center}
+.tracker-num .n{font-family:var(--font-head);font-size:1.5rem;font-weight:700;line-height:1}
+.tracker-num .l{font-size:11px;color:var(--muted)}
+.n-total{color:var(--text)}.n-sold{color:var(--accent3)}.n-left{color:var(--accent)}
+.progress-track{height:8px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+.progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .6s cubic-bezier(.4,0,.2,1)}
+.avail-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:100px;margin-top:10px}
+.avail-status::before{content:'';width:6px;height:6px;border-radius:50%}
+.status-ok{background:rgba(68,212,140,.1);color:var(--success)}.status-ok::before{background:var(--success)}
+.status-warn{background:rgba(240,160,68,.1);color:var(--warn)}.status-warn::before{background:var(--warn)}
+.status-full{background:rgba(255,90,90,.1);color:var(--danger)}.status-full::before{background:var(--danger)}
+
+.booking-card{background:var(--surface);border:.5px solid var(--border2);border-radius:20px;padding:2rem;position:relative;overflow:hidden}
+.booking-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--accent3))}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.form-group label .req{color:var(--accent);margin-left:2px}
+.form-group input,.form-group select{background:rgba(255,255,255,.04);border:.5px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--font-body);font-size:15px;padding:11px 14px;outline:none;transition:border-color .2s,background .2s,box-shadow .2s;width:100%;-webkit-appearance:none}
+.form-group select{cursor:pointer}
+.form-group select option{background:#1a1a24;color:var(--text)}
+.form-group input::placeholder{color:rgba(136,136,153,.5)}
+.form-group input:hover,.form-group select:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06)}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent);background:rgba(200,240,68,.04);box-shadow:0 0 0 3px rgba(200,240,68,.08)}
+.form-group input.err,.form-group select.err{border-color:var(--danger);box-shadow:0 0 0 3px rgba(255,90,90,.08)}
+.err-msg{font-size:12px;color:var(--danger);display:flex;align-items:center;gap:4px}
+.err-msg::before{content:'!';width:14px;height:14px;background:var(--danger);color:#0a0a0f;font-weight:700;font-size:10px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.cost-preview{background:rgba(200,240,68,.05);border:.5px solid rgba(200,240,68,.15);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;grid-column:1/-1}
+.cost-preview .cp-label{font-size:13px;color:var(--muted)}
+.cost-preview .cp-total{font-family:var(--font-head);font-size:1.4rem;font-weight:700;color:var(--accent)}
+.btn-row{display:flex;gap:12px;margin-top:1.5rem}
+.btn{padding:12px 28px;border-radius:10px;font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:.02em;cursor:pointer;border:none;transition:all .18s}
+.btn-primary{background:var(--accent);color:#0a0a0f;flex:1}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+.btn-primary:active{transform:scale(.97)}
+.btn-ghost{background:transparent;color:var(--muted);border:.5px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,.05);color:var(--text)}
+
+/* PAYMENT */
+.pay-layout{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start}
+.order-summary{background:var(--surface2);border:.5px solid var(--border2);border-radius:16px;padding:1.5rem;position:sticky;top:90px}
+.order-summary h3{font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:.5px solid var(--border)}
+.os-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:.5px solid var(--border)}
+.os-row:last-child{border:none}
+.os-key{color:var(--muted)}.os-val{font-weight:500;text-align:right;max-width:55%}
+.os-total{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding:12px 14px;background:rgba(200,240,68,.07);border:.5px solid rgba(200,240,68,.15);border-radius:10px}
+.os-total-label{font-size:13px;color:var(--muted)}
+.os-total-val{font-family:var(--font-head);font-size:1.5rem;font-weight:800;color:var(--accent)}
+.pay-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.pay-method{background:rgba(255,255,255,.03);border:.5px solid var(--border2);border-radius:12px;padding:.9rem .75rem;text-align:center;cursor:pointer;transition:all .2s;user-select:none}
+.pay-method:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}
+.pay-method.sel{background:rgba(200,240,68,.07);border-color:rgba(200,240,68,.4);box-shadow:0 0 0 2px rgba(200,240,68,.12)}
+.pm-icon{font-size:1.6rem;margin-bottom:4px;display:block}
+.pm-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.pay-method.sel .pm-label{color:var(--accent)}
+.pay-panel{display:none}.pay-panel.active{display:block}
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.card-wrap{position:relative}
+.card-wrap .ci{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+.bank-grid,.wallet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.chip{background:rgba(255,255,255,.03);border:.5px solid var(--border2);border-radius:10px;padding:.7rem .6rem;text-align:center;cursor:pointer;transition:all .2s;font-size:12px;font-weight:500;color:var(--muted)}
+.chip:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.chip.sel{background:rgba(200,240,68,.07);border-color:rgba(200,240,68,.4);color:var(--accent)}
+.chip .ci2{display:block;font-size:1.2rem;margin-bottom:3px}
+.secure{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-top:1rem;padding:.6rem .9rem;background:rgba(68,212,140,.05);border:.5px solid rgba(68,212,140,.12);border-radius:8px}
+.secure svg{flex-shrink:0;width:14px;height:14px}
+.processing{display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;text-align:center}
+.processing.on{display:flex}
+.spinner{width:48px;height:48px;border:3px solid rgba(255,255,255,.07);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:1.5rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.processing h3{font-family:var(--font-head);font-size:1.2rem;font-weight:700;margin-bottom:.5rem}
+.processing p{font-size:13px;color:var(--muted)}
+
+/* CONFIRM */
+.confirm-anim{animation:slideUp .4s cubic-bezier(.4,0,.2,1)}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.confirm-big{text-align:center;padding:2rem 1rem 1.5rem}
+.check-circle{width:72px;height:72px;background:rgba(68,212,140,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
+.check-circle svg{width:36px;height:36px}
+.confirm-big h2{font-family:var(--font-head);font-size:1.8rem;font-weight:800;color:var(--success);margin-bottom:.5rem}
+.confirm-big p{color:var(--muted);font-size:14px}
+.txn-id{display:inline-block;background:var(--surface2);border:.5px solid var(--border2);border-radius:8px;padding:4px 14px;font-size:12px;font-family:monospace;color:var(--muted);margin-top:10px;letter-spacing:.04em}
+.conf-card{background:var(--surface);border:.5px solid var(--border2);border-radius:16px;padding:1.5rem;margin-top:1.5rem}
+.conf-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:.5px solid rgba(255,255,255,.05);font-size:14px}
+.conf-row:last-child{border:none}
+.cr-key{color:var(--muted)}.cr-val{font-weight:500;text-align:right;max-width:60%}
+.conf-total{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(200,240,68,.07);border:.5px solid rgba(200,240,68,.15);border-radius:10px;margin-top:1rem}
+.ct-label{font-size:13px;color:var(--muted)}.ct-val{font-family:var(--font-head);font-size:1.6rem;font-weight:800;color:var(--accent)}
+.ticket-stub{background:var(--surface2);border:.5px solid var(--border2);border-radius:14px;padding:1.25rem 1.5rem;margin-top:1rem;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden}
+.ticket-stub::after{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--accent2),var(--accent),var(--accent3))}
+.ts-event{font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:2px}
+.ts-sub{font-size:12px;color:var(--muted)}
+.ts-count{font-family:var(--font-head);font-size:1.6rem;font-weight:800;color:var(--accent);margin-left:auto;padding-right:12px}
+
+footer{border-top:.5px solid var(--border);margin-top:4rem;padding:2rem 1.5rem;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:700px){
+  .hero{grid-template-columns:1fr}
+  .pay-layout{grid-template-columns:1fr}
+  .order-summary{position:static}
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  .cost-preview{grid-column:1}
+  .card-row{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:.5rem;text-align:center}
+  .step-label{display:none}
+}
+</style>
+</head>
+<body>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<nav>
+  <div class="nav-logo">Tech<span>Vista</span></div>
+  <button class="nav-pill" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">Book Now</button>
+</nav>
+
+<div class="wrapper" id="main">
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step active" id="s1"><div class="step-num" id="sn1">1</div><div class="step-label">Details</div></div>
+    <div class="step-line" id="sl1"></div>
+    <div class="step pending" id="s2"><div class="step-num" id="sn2">2</div><div class="step-label">Payment</div></div>
+    <div class="step-line" id="sl2"></div>
+    <div class="step pending" id="s3"><div class="step-num" id="sn3">3</div><div class="step-label">Confirmed</div></div>
+  </div>
+
+  <!-- ── STEP 1: BOOKING ── -->
+  <div id="step1">
+    <section class="hero reveal">
+      <div>
+        <div class="hero-tag">Registrations Open</div>
+        <h1>National Technical<br><em>Symposium</em> 2025</h1>
+        <p class="hero-sub">Explore cutting-edge tech, connect with innovators, and compete in flagship events hosted by the Department of CSE.</p>
+      </div>
+      <div>
+        <div class="price-badge">
+          <div class="lbl">Entry Fee</div>
+          <div class="price">₹299</div>
+          <div class="per">per ticket</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-title reveal">Event information</div>
+    <div class="details-grid reveal">
+      <div class="detail-cell"><div class="dc-label">Event</div><div class="dc-value">TechVista 2025</div></div>
+      <div class="detail-cell"><div class="dc-label">Department</div><div class="dc-value">Computer Science &amp; Engineering</div></div>
+      <div class="detail-cell"><div class="dc-label">Date</div><div class="dc-value">Saturday, 10 May 2025</div></div>
+      <div class="detail-cell"><div class="dc-label">Time</div><div class="dc-value">9:00 AM – 5:00 PM</div></div>
+      <div class="detail-cell"><div class="dc-label">Venue</div><div class="dc-value">Auditorium Block A, Main Campus</div></div>
+      <div class="detail-cell"><div class="dc-label">Price</div><div class="dc-value">₹299 per seat</div></div>
+    </div>
+
+    <div class="tracker reveal">
+      <div class="tracker-top">
+        <span class="tracker-label">Seat availability</span>
+        <div class="tracker-nums">
+          <div class="tracker-num"><div class="n n-total" id="t-total">150</div><div class="l">Total</div></div>
+          <div class="tracker-num"><div class="n n-sold" id="t-sold">0</div><div class="l">Booked</div></div>
+          <div class="tracker-num"><div class="n n-left" id="t-left">150</div><div class="l">Left</div></div>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="t-bar" style="width:0%"></div></div>
+      <span class="avail-status status-ok" id="t-status">Tickets available</span>
+    </div>
+
+    <div class="section-title reveal">Your details</div>
+    <div class="booking-card reveal">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full name <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="e.g. Arun Kumar" autocomplete="name"/>
+          <span class="err-msg" id="e-name" style="display:none"></span>
+        </div>
+        <div class="form-group">
+          <label>Email address <span class="req">*</span></label>
+          <input type="email" id="f-email" placeholder="you@college.edu"/>
+          <span class="err-msg" id="e-email" style="display:none"></span>
+        </div>
+        <div class="form-group">
+          <label>Department <span class="req">*</span></label>
+          <select id="f-dept">
+            <option value="">Select department</option>
+            <option>Computer Science &amp; Engineering</option>
+            <option>Electronics &amp; Communication</option>
+            <option>Mechanical Engineering</option>
+            <option>Civil Engineering</option>
+            <option>Information Technology</option>
+            <option>Electrical Engineering</option>
+            <option>Biotechnology</option>
+            <option>MBA</option><option>MCA</option><option>Other</option>
+          </select>
+          <span class="err-msg" id="e-dept" style="display:none"></span>
+        </div>
+        <div class="form-group">
+          <label>No. of tickets <span class="req">*</span></label>
+          <input type="number" id="f-tickets" placeholder="1" min="1" max="10"/>
+          <span class="err-msg" id="e-tickets" style="display:none"></span>
+        </div>
+        <div class="cost-preview" id="cost-preview" style="display:none">
+          <span class="cp-label">Total to pay</span>
+          <span class="cp-total" id="cp-total">₹0</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="gotoPayment()">Proceed to Payment →</button>
+        <button class="btn btn-ghost" onclick="resetForm()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: PAYMENT ── -->
+  <div id="step2" style="display:none">
+    <div class="section-title">Secure payment</div>
+    <div class="pay-layout">
+
+      <!-- payment form -->
+      <div class="booking-card">
+        <div id="pay-inner">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem">Select a payment method to complete your booking</p>
+
+          <div class="pay-methods">
+            <div class="pay-method sel" id="pm-card" onclick="pickMethod('card')">
+              <span class="pm-icon">💳</span><span class="pm-label">Card</span>
+            </div>
+            <div class="pay-method" id="pm-upi" onclick="pickMethod('upi')">
+              <span class="pm-icon">📱</span><span class="pm-label">UPI</span>
+            </div>
+            <div class="pay-method" id="pm-net" onclick="pickMethod('net')">
+              <span class="pm-icon">🏦</span><span class="pm-label">Net Banking</span>
+            </div>
+          </div>
+
+          <!-- card -->
+          <div class="pay-panel active" id="panel-card">
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Cardholder name <span class="req">*</span></label>
+              <input type="text" id="p-cname" placeholder="Name as on card"/>
+              <span class="err-msg" id="pe-cname" style="display:none"></span>
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label>Card number <span class="req">*</span></label>
+              <div class="card-wrap">
+                <input type="text" id="p-cnum" placeholder="0000 0000 0000 0000" maxlength="19" oninput="fmtCard(this)"/>
+                <span class="ci">💳</span>
+              </div>
+              <span class="err-msg" id="pe-cnum" style="display:none"></span>
+            </div>
+            <div class="card-row">
+              <div class="form-group">
+                <label>Expiry <span class="req">*</span></label>
+                <input type="text" id="p-exp" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)"/>
+                <span class="err-msg" id="pe-exp" style="display:none"></span>
+              </div>
+              <div class="form-group">
+                <label>CVV <span class="req">*</span></label>
+                <input type="password" id="p-cvv" placeholder="•••" maxlength="4"/>
+                <span class="err-msg" id="pe-cvv" style="display:none"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- upi -->
+          <div class="pay-panel" id="panel-upi">
+            <div class="form-group" style="margin-bottom:1rem">
+              <label>UPI ID <span class="req">*</span></label>
+              <input type="text" id="p-upi" placeholder="yourname@upi"/>
+              <span class="err-msg" id="pe-upi" style="display:none"></span>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:.75rem">Or scan QR code</p>
+            <div style="background:var(--surface2);border:.5px solid var(--border2);border-radius:12px;padding:1.25rem;display:flex;gap:1rem;align-items:center">
+              <svg width="76" height="76" viewBox="0 0 76 76" style="flex-shrink:0;background:#fff;padding:5px;border-radius:8px">
+                <rect x="4" y="4" width="22" height="22" rx="2" fill="#111"/>
+                <rect x="7" y="7" width="16" height="16" rx="1" fill="#fff"/>
+                <rect x="9" y="9" width="12" height="12" fill="#111"/>
+                <rect x="50" y="4" width="22" height="22" rx="2" fill="#111"/>
+                <rect x="53" y="7" width="16" height="16" rx="1" fill="#fff"/>
+                <rect x="55" y="9" width="12" height="12" fill="#111"/>
+                <rect x="4" y="50" width="22" height="22" rx="2" fill="#111"/>
+                <rect x="7" y="53" width="16" height="16" rx="1" fill="#fff"/>
+                <rect x="9" y="55" width="12" height="12" fill="#111"/>
+                <rect x="30" y="4" width="5" height="5" fill="#111"/>
+                <rect x="37" y="4" width="5" height="5" fill="#111"/>
+                <rect x="44" y="4" width="5" height="5" fill="#111"/>
+                <rect x="30" y="11" width="5" height="5" fill="#111"/>
+                <rect x="44" y="11" width="5" height="5" fill="#111"/>
+                <rect x="30" y="18" width="14" height="5" fill="#111"/>
+                <rect x="30" y="30" width="5" height="5" fill="#111"/>
+                <rect x="37" y="30" width="5" height="5" fill="#111"/>
+                <rect x="44" y="30" width="5" height="5" fill="#111"/>
+                <rect x="55" y="30" width="5" height="5" fill="#111"/>
+                <rect x="62" y="30" width="5" height="5" fill="#111"/>
+                <rect x="30" y="37" width="5" height="5" fill="#111"/>
+                <rect x="44" y="37" width="5" height="5" fill="#111"/>
+                <rect x="62" y="37" width="5" height="5" fill="#111"/>
+                <rect x="30" y="44" width="14" height="5" fill="#111"/>
+                <rect x="55" y="44" width="12" height="5" fill="#111"/>
+                <rect x="30" y="55" width="5" height="5" fill="#111"/>
+                <rect x="37" y="62" width="5" height="5" fill="#111"/>
+                <rect x="44" y="55" width="5" height="5" fill="#111"/>
+                <rect x="55" y="55" width="12" height="5" fill="#111"/>
+                <rect x="62" y="62" width="5" height="5" fill="#111"/>
+              </svg>
+              <div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:4px">Scan to Pay</div>
+                <div style="font-size:12px;color:var(--muted)">techvista@nit<br>Open any UPI app &amp; scan</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- net banking -->
+          <div class="pay-panel" id="panel-net">
+            <p style="font-size:12px;color:var(--muted);margin-bottom:.75rem">Select your bank</p>
+            <div class="bank-grid">
+              <div class="chip" onclick="pickBank(this)"><span class="ci2">🏛</span>SBI</div>
+              <div class="chip" onclick="pickBank(this)"><span class="ci2">🏦</span>HDFC</div>
+              <div class="chip" onclick="pickBank(this)"><span class="ci2">🏦</span>ICICI</div>
+              <div class="chip" onclick="pickBank(this)"><span class="ci2">🏦</span>Axis</div>
+              <div class="chip" onclick="pickBank(this)"><span class="ci2">🏛</span>PNB</div>
+              <div class="chip" onclick="pickBank(this)"><span class="ci2">🏦</span>Kotak</div>
+            </div>
+            <span class="err-msg" id="pe-bank" style="display:none"></span>
+          </div>
+
+          <div class="secure">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            256-bit SSL encrypted &nbsp;·&nbsp; Secure demo payment gateway
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="processPayment()">Pay ₹<span id="pay-amount">0</span> Now</button>
+            <button class="btn btn-ghost" onclick="goBack()">← Back</button>
+          </div>
+        </div>
+
+        <!-- processing -->
+        <div class="processing" id="processing">
+          <div class="spinner"></div>
+          <h3>Processing payment…</h3>
+          <p>Please do not close this window</p>
+        </div>
+      </div>
+
+      <!-- order summary -->
+      <div class="order-summary">
+        <h3>Order summary</h3>
+        <div id="os-rows"></div>
+        <div class="os-total">
+          <span class="os-total-label">Total</span>
+          <span class="os-total-val" id="os-total"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: CONFIRMED ── -->
+  <div id="step3" style="display:none" class="confirm-anim">
+    <div class="confirm-big">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M7.5 12l3 3 6-6"/>
+        </svg>
+      </div>
+      <h2>Payment successful!</h2>
+      <p>Your tickets are confirmed. Check your email for the e-ticket.</p>
+      <div class="txn-id" id="txn-id">TXN#000000</div>
+    </div>
+
+    <div class="ticket-stub">
+      <span style="font-size:2rem">🎟</span>
+      <div>
+        <div class="ts-event">TechVista 2025 — National Technical Symposium</div>
+        <div class="ts-sub">10 May 2025 · Auditorium Block A, Main Campus</div>
+      </div>
+      <div class="ts-count" id="ts-count">×1</div>
+    </div>
+
+    <div class="conf-card">
+      <div id="final-rows"></div>
+      <div class="conf-total">
+        <span class="ct-label">Amount paid</span>
+        <span class="ct-val" id="final-total">₹0</span>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:1.5rem">
+      <button class="btn btn-primary" onclick="startOver()">Book More Tickets</button>
+      <button class="btn btn-ghost" onclick="window.print()">🖨 Print / Save</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div>© 2025 TechVista — Department of CSE, National Institute of Technology</div>
+  <div>All rights reserved</div>
+</footer>
+
+<script>
+const PRICE=299, TOTAL=150;
+let bookedTotal=0;
+let S={name:'',email:'',dept:'',tickets:0,total:0,method:'card',bank:''};
+
+function avail(){ return TOTAL-bookedTotal; }
+
+// reveal
+const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');ro.unobserve(e.target);}});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+// tracker
+function updateTracker(){
+  const a=avail(),sold=TOTAL-a,pct=Math.round(sold/TOTAL*100);
+  document.getElementById('t-sold').textContent=sold;
+  document.getElementById('t-left').textContent=a;
+  document.getElementById('t-bar').style.width=pct+'%';
+  const st=document.getElementById('t-status');
+  if(a===0){st.className='avail-status status-full';st.textContent='Sold out';}
+  else if(a<20){st.className='avail-status status-warn';st.textContent='Almost full — '+a+' left';}
+  else{st.className='avail-status status-ok';st.textContent='Tickets available';}
+}
+
+// live cost
+document.getElementById('f-tickets').addEventListener('input',function(){
+  const n=parseInt(this.value),p=document.getElementById('cost-preview');
+  if(!isNaN(n)&&n>0){p.style.display='flex';document.getElementById('cp-total').textContent='₹'+(n*PRICE).toLocaleString('en-IN');}
+  else p.style.display='none';
+  cErr('tickets');
+});
+['name','email','dept'].forEach(id=>{
+  const el=document.getElementById('f-'+id);
+  el.addEventListener('input',()=>cErr(id));
+  if(el.tagName==='SELECT')el.addEventListener('change',()=>cErr(id));
+});
+function cErr(f){const el=document.getElementById('f-'+f),m=document.getElementById('e-'+f);el.classList.remove('err');m.style.display='none';}
+function sErr(f,msg){const el=document.getElementById('f-'+f),m=document.getElementById('e-'+f);el.classList.add('err');m.textContent=msg;m.style.display='flex';}
+
+// validate step1
+function val1(){
+  let ok=true;
+  const name=document.getElementById('f-name').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  const dept=document.getElementById('f-dept').value;
+  const tr=document.getElementById('f-tickets').value;
+  const t=parseInt(tr);
+  if(!name){sErr('name','Full name is required.');ok=false;}
+  else if(name.length<2){sErr('name','Enter a valid full name.');ok=false;}
+  if(!email){sErr('email','Email is required.');ok=false;}
+  else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){sErr('email','Enter a valid email address.');ok=false;}
+  if(!dept){sErr('dept','Please select your department.');ok=false;}
+  if(!tr){sErr('tickets','Number of tickets is required.');ok=false;}
+  else if(isNaN(t)||t<=0){sErr('tickets','Must be a positive number.');ok=false;}
+  else if(t>10){sErr('tickets','Maximum 10 tickets per booking.');ok=false;}
+  else if(t>avail()){sErr('tickets','Only '+avail()+' ticket(s) remaining.');ok=false;}
+  return ok;
+}
+
+function gotoPayment(){
+  if(!val1())return;
+  S.name=document.getElementById('f-name').value.trim();
+  S.email=document.getElementById('f-email').value.trim();
+  S.dept=document.getElementById('f-dept').value;
+  S.tickets=parseInt(document.getElementById('f-tickets').value);
+  S.total=S.tickets*PRICE;
+
+  const rows=[['Event','TechVista 2025'],['Date','10 May 2025, 9:00 AM'],['Venue','Auditorium Block A'],['Attendee',S.name],['Department',S.dept],['Tickets',S.tickets+' × ₹'+PRICE]];
+  document.getElementById('os-rows').innerHTML=rows.map(([k,v])=>`<div class="os-row"><span class="os-key">${k}</span><span class="os-val">${v}</span></div>`).join('');
+  document.getElementById('os-total').textContent='₹'+S.total.toLocaleString('en-IN');
+  document.getElementById('pay-amount').textContent=S.total.toLocaleString('en-IN');
+  goStep(2);
+}
+function goBack(){ goStep(1); }
+function resetForm(){
+  ['name','email','dept','tickets'].forEach(f=>{document.getElementById('f-'+f).value='';cErr(f);});
+  document.getElementById('cost-preview').style.display='none';
+}
+
+// payment method
+let curMethod='card', curBank='';
+function pickMethod(m){
+  curMethod=m; S.method=m;
+  ['card','upi','net'].forEach(id=>{
+    document.getElementById('pm-'+id).classList.remove('sel');
+    document.getElementById('panel-'+id).classList.remove('active');
+  });
+  document.getElementById('pm-'+m).classList.add('sel');
+  document.getElementById('panel-'+m).classList.add('active');
+}
+function pickBank(el){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  curBank=el.textContent.trim();
+  S.bank=curBank;
+  document.getElementById('pe-bank').style.display='none';
+}
+function fmtCard(el){let v=el.value.replace(/\D/g,'').substring(0,16);el.value=v.replace(/(.{4})/g,'$1 ').trim();}
+function fmtExp(el){let v=el.value.replace(/\D/g,'').substring(0,4);if(v.length>=2)v=v.substring(0,2)+' / '+v.substring(2);el.value=v;}
+
+function cpErr(f,msg){const m=document.getElementById('pe-'+f);const i=document.getElementById('p-'+f);if(i)i.classList.add('err');m.textContent=msg;m.style.display='flex';}
+function ccErr(f){const m=document.getElementById('pe-'+f);const i=document.getElementById('p-'+f);if(i)i.classList.remove('err');m.style.display='none';}
+
+function val2(){
+  let ok=true;
+  if(curMethod==='card'){
+    const cn=document.getElementById('p-cname').value.trim();
+    const num=document.getElementById('p-cnum').value.replace(/\s/g,'');
+    const exp=document.getElementById('p-exp').value.replace(/[\s\/]/g,'');
+    const cvv=document.getElementById('p-cvv').value.trim();
+    if(!cn){cpErr('cname','Cardholder name is required.');ok=false;}else ccErr('cname');
+    if(!num||num.length<16){cpErr('cnum','Enter a valid 16-digit card number.');ok=false;}else ccErr('cnum');
+    if(!exp||exp.length<4){cpErr('exp','Enter expiry as MM/YY.');ok=false;}
+    else{
+      const mm=parseInt(exp.substring(0,2)),yy=parseInt('20'+exp.substring(2));
+      const now=new Date();
+      if(mm<1||mm>12||yy<now.getFullYear()||(yy===now.getFullYear()&&mm<now.getMonth()+1)){cpErr('exp','Card has expired.');ok=false;}else ccErr('exp');
+    }
+    if(!cvv||cvv.length<3){cpErr('cvv','Enter a valid CVV.');ok=false;}else ccErr('cvv');
+  } else if(curMethod==='upi'){
+    const uid=document.getElementById('p-upi').value.trim();
+    if(!uid||!/^[\w.\-]+@[\w]+$/.test(uid)){cpErr('upi','Enter a valid UPI ID (e.g. name@upi).');ok=false;}else ccErr('upi');
+  } else if(curMethod==='net'){
+    if(!curBank){document.getElementById('pe-bank').textContent='Please select a bank.';document.getElementById('pe-bank').style.display='flex';ok=false;}
+  }
+  return ok;
+}
+
+function processPayment(){
+  if(!val2())return;
+  document.getElementById('pay-inner').style.display='none';
+  document.getElementById('processing').classList.add('on');
+  setTimeout(()=>finishPayment(),2400);
+}
+
+function finishPayment(){
+  bookedTotal+=S.tickets;
+  updateTracker();
+  const txn='TVT'+Date.now().toString(36).toUpperCase();
+  document.getElementById('txn-id').textContent='TXN#'+txn;
+  document.getElementById('ts-count').textContent='×'+S.tickets;
+  const mLabel=curMethod==='card'?'Credit / Debit Card':curMethod==='upi'?'UPI':('Net Banking — '+S.bank);
+  const rows=[['Attendee',S.name],['Email',S.email],['Department',S.dept],['Event','TechVista 2025 — National Technical Symposium'],['Venue','Auditorium Block A, Main Campus'],['Date & Time','Saturday, 10 May 2025 | 9:00 AM – 5:00 PM'],['Payment method',mLabel],['Tickets',S.tickets+' × ₹'+PRICE]];
+  document.getElementById('final-rows').innerHTML=rows.map(([k,v])=>`<div class="conf-row"><span class="cr-key">${k}</span><span class="cr-val">${v}</span></div>`).join('');
+  document.getElementById('final-total').textContent='₹'+S.total.toLocaleString('en-IN');
+  goStep(3);
+}
+
+function startOver(){
+  document.getElementById('pay-inner').style.display='block';
+  document.getElementById('processing').classList.remove('on');
+  pickMethod('card');
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  curBank=''; S.bank='';
+  resetForm();
+  goStep(1);
+}
+
+// step manager
+function goStep(n){
+  document.getElementById('step1').style.display=n===1?'block':'none';
+  document.getElementById('step2').style.display=n===2?'block':'none';
+  document.getElementById('step3').style.display=n===3?'block':'none';
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById('s'+i);
+    el.className='step '+(i<n?'done':i===n?'active':'pending');
+    if(i<3)document.getElementById('sl'+i).className='step-line'+(i<n?' done':'');
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+updateTracker();
+</script>
+</body>
+</html>
